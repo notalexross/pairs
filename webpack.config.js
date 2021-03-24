@@ -13,7 +13,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src', 'index.html'),
       templateParameters: {
-        env: dotenv.parsed,
+        env: {
+          ...dotenv.parsed,
+          ...process.env
+        }
       },
     }),
     new MiniCssExtractPlugin(),
