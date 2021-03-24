@@ -2,7 +2,8 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
-const CopyPlugin = require("copy-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin")
+const dotenv = require('dotenv').config({path: __dirname + '/.env'})
 
 module.exports = {
   output: {
@@ -10,7 +11,10 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'src', 'index.html')
+      template: path.resolve(__dirname, 'src', 'index.html'),
+      templateParameters: {
+        env: dotenv.parsed,
+      },
     }),
     new MiniCssExtractPlugin(),
     new CopyPlugin({
