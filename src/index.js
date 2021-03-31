@@ -3,7 +3,7 @@ import './index.css'
 import MESSAGES from './language'
 import { getRandomImages, formatTime } from './utils'
 
-const body = document.body
+const { body } = document
 const loadingSpinner = document.querySelector('#loading')
 const grid = document.querySelector('#grid')
 const movesContainer = document.querySelectorAll('.moves')
@@ -23,19 +23,35 @@ const themes = ['theme-1', 'theme-2', 'theme-3', 'theme-4']
 const timeShown = 800
 const timerInterval = 20
 const imageLoadTimeout = 5000
-let moves, time, pairs, numRows, numColumns, currentActiveCard, numPairs, personalBests, timerId, currentTheme
+let moves
+let time
+let pairs
+let numRows
+let numColumns
+let currentActiveCard
+let numPairs
+let personalBests
+let timerId
+let currentTheme
+
+function saveTheme(theme) {
+  window.localStorage.setItem('theme', JSON.stringify(theme))
+}
 
 function switchTheme(setTheme = false) {
-  const themeIndex = themes.findIndex((theme) => theme === currentTheme)
+  const themeIndex = themes.findIndex(theme => theme === currentTheme)
+
   let nextThemeIndex
   if (setTheme && themeIndex >= 0) {
     nextThemeIndex = themeIndex
   } else {
     nextThemeIndex = (themeIndex + 1) % themes.length
   }
+
   currentTheme = themes[nextThemeIndex]
-  saveTheme()
-  themes.forEach((theme) => {
+  saveTheme(currentTheme)
+
+  themes.forEach(theme => {
     body.classList.remove(theme)
   })
   body.classList.add(currentTheme)
@@ -45,10 +61,6 @@ function loadTheme() {
   currentTheme = JSON.parse(window.localStorage.getItem('theme'))
   switchTheme(true)
   body.style.visibility = 'visible'
-}
-
-function saveTheme() {
-  window.localStorage.setItem('theme', JSON.stringify(currentTheme))
 }
 
 function loadPersonalBests() {
@@ -69,6 +81,7 @@ function isPersonalBest() {
   if (isLessMoves || (isSameMoves && isLessTime)) {
     return true
   }
+
   return false
 }
 
@@ -81,10 +94,12 @@ function updatePersonalBests() {
 }
 
 function renderMoves() {
-  movesContainer.forEach((el) => (el.textContent = moves))
+  movesContainer.forEach(el => {
+    el.textContent = moves
+  })
   if (personalBests[numPairs]) {
     const movesPB = personalBests[numPairs].moves
-    const movesText = movesPB === numPairs ? movesPB + '⭐' : movesPB
+    const movesText = movesPB === numPairs ? `${movesPB}⭐` : movesPB
     pbMovesContainer.textContent = movesText
     pbTimeContainer.textContent = formatTime(personalBests[numPairs].time, { showCent: false })
   } else {
@@ -93,14 +108,63 @@ function renderMoves() {
   }
 }
 
-function renderTimer() {
-  const formattedTime = formatTime(time)
-  timerContainer.forEach((el) => (el.textContent = formattedTime))
+function incrementMovesCounter() {
+  moves += 1
+  renderMoves()
 }
 
-function incrementMovesCounter() {
-  moves++
-  renderMoves()
+function renderTimer() {
+  const formattedTime = formatTime(time)
+  timerContainer.forEach(el => {
+    el.textContent = formattedTime
+  })
+}
+
+function clearTimer() {
+  clearInterval(timerId)
+}
+
+function display(element) {
+  element.style.visibility = 'visible'
+}
+
+function hide(element) {
+  element.style.visibility = 'hidden'
+}
+
+function handleGameOver() {
+  clearTimer()
+
+  let message
+  if (isPersonalBest()) {
+    updatePersonalBests()
+    if (personalBests[numPairs].moves === numPairs) {
+      message = MESSAGES.PERFECT_PB
+    } else {
+      message = MESSAGES.PB
+    }
+  } else if (personalBests[numPairs].moves === numPairs) {
+    message = MESSAGES.PERFECT_NO_PB
+  } else {
+    message = MESSAGES.NO_PB
+  }
+
+  gameResultsMessageContainer.textContent = message
+  gameResultsContainer.classList.remove('shown')
+  display(gameResultsContainer)
+  setTimeout(() => {
+    gameResultsContainer.classList.add('shown')
+  }, timeShown)
+}
+
+function setIsLoading(isLoading) {
+  if (isLoading) {
+    display(loadingSpinner)
+    hide(grid)
+  } else {
+    display(grid)
+    hide(loadingSpinner)
+  }
 }
 
 function buildCard(cardWidth) {
@@ -128,13 +192,14 @@ function buildCard(cardWidth) {
   function clickHandler() {
     if (card.classList.contains('card--active')) return
     card.classList.add('card--active')
+
     if (currentActiveCard) {
       const activeCard = currentActiveCard
       const isPair = card.dataset.src === activeCard.dataset.src
       incrementMovesCounter()
       currentActiveCard = undefined
       if (isPair) {
-        pairs++
+        pairs += 1
         if (pairs >= numPairs) {
           handleGameOver()
         }
@@ -161,40 +226,18 @@ function buildCards(cardWidth) {
   return cards
 }
 
-function shuffle(cards) {
+function getShuffledCards(cards) {
   const cardsCopy = cards.slice()
   const numCards = cardsCopy.length
+
+  const shuffledCards = []
   for (let i = 0; i < numCards; i++) {
     const randomIndex = Math.floor(Math.random() * cardsCopy.length)
-    cards[i] = cardsCopy.splice(randomIndex, 1)[0]
+    const [randomCard] = cardsCopy.splice(randomIndex, 1)
+    shuffledCards[i] = randomCard
   }
-}
 
-function setIsLoading(isLoading) {
-  if (isLoading) {
-    display(loadingSpinner)
-    hide(grid)
-  } else {
-    display(grid)
-    hide(loadingSpinner)
-  }
-}
-
-function clearTimer() {
-  clearInterval(timerId)
-}
-
-function resetGame(columns, rows) {
-  currentActiveCard = undefined
-  clearTimer()
-  numColumns = columns
-  numRows = rows
-  moves = 0
-  time = 0
-  pairs = 0
-  numPairs = Math.floor((numColumns * numRows) / 2)
-  renderMoves()
-  renderTimer()
+  return shuffledCards
 }
 
 async function addImages(cards, images) {
@@ -205,12 +248,14 @@ async function addImages(cards, images) {
   const promises = cards.map((card, idx) => {
     const cardImage = card.querySelector('.card__image')
     const imageIdx = idx % images.length
+
     let image
     if (images[imageIdx]) {
       image = images[imageIdx]
     } else {
       image = offlineContent[imageIdx]
     }
+
     const imageAlt = image.split('/').reverse()[0]
     card.dataset.src = image
     cardImage.src = image
@@ -234,20 +279,20 @@ async function addImages(cards, images) {
 
 async function populateGrid() {
   setIsLoading(true)
-  const cardWidth = (1 / numColumns) * 100 + '%'
+  const cardWidth = `${(1 / numColumns) * 100}%`
   const cards = buildCards(cardWidth)
 
   grid.innerHTML = ''
-  cards.forEach((card) => {
+  cards.forEach(card => {
     grid.append(card)
   })
 
-  shuffle(cards)
+  const shuffledCards = getShuffledCards(cards)
 
   const images = await getRandomImages(numPairs)
 
-  addImages(cards, images)
-    .catch((err) => console.error(err))
+  addImages(shuffledCards, images)
+    .catch(err => console.error(err))
     .finally(() => {
       setIsLoading(false)
       const timeInitial = Date.now()
@@ -259,56 +304,34 @@ async function populateGrid() {
     })
 }
 
+function resetGame(columns, rows) {
+  currentActiveCard = undefined
+  clearTimer()
+  numColumns = columns
+  numRows = rows
+  moves = 0
+  time = 0
+  pairs = 0
+  numPairs = Math.floor((numColumns * numRows) / 2)
+  renderMoves()
+  renderTimer()
+}
+
 async function newGame(columns = 4, rows = 4) {
   resetGame(columns, rows)
   populateGrid()
 }
 
-function display(element) {
-  element.style.visibility = 'visible'
-}
-
-function hide(element) {
-  element.style.visibility = 'hidden'
-}
-
-function handleGameOver() {
-  clearTimer()
-
-  let message
-  if (isPersonalBest()) {
-    updatePersonalBests()
-    if (personalBests[numPairs].moves === numPairs) {
-      message = MESSAGES.PERFECT_PB
-    } else {
-      message = MESSAGES.PB
-    }
-  } else {
-    if (personalBests[numPairs].moves === numPairs) {
-      message = MESSAGES.PERFECT_NO_PB
-    } else {
-      message = MESSAGES.NO_PB
-    }
-  }
-  gameResultsMessageContainer.textContent = message
-
-  gameResultsContainer.classList.remove('shown')
-  display(gameResultsContainer)
-  setTimeout(() => {
-    gameResultsContainer.classList.add('shown')
-  }, timeShown)
-}
-
 function initListeners() {
   clearStorageButton.addEventListener('click', () => {
-    const shouldClear = confirm('Clear personal bests and reset your selected theme?')
+    const shouldClear = window.confirm('Clear personal bests and reset your selected theme?')
     if (shouldClear) {
       window.localStorage.clear()
-      location.reload()
+      window.location.reload()
     }
   })
 
-  resetButtons.forEach((btn) => {
+  resetButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       grid.innerHTML = ''
       hide(gameContainer)
@@ -318,9 +341,8 @@ function initListeners() {
     })
   })
 
-  gameModeButtons.forEach((button) => {
-    const columns = button.dataset.columns
-    const rows = button.dataset.rows
+  gameModeButtons.forEach(button => {
+    const { columns, rows } = button.dataset
     button.addEventListener('click', () => {
       newGame(columns, rows)
       hide(gameSelectContainer)
@@ -328,7 +350,7 @@ function initListeners() {
     })
   })
 
-  themeButton.addEventListener('click', (event) => {
+  themeButton.addEventListener('click', event => {
     event.target.blur()
     switchTheme()
   })

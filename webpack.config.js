@@ -2,8 +2,8 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
-const CopyPlugin = require("copy-webpack-plugin")
-const dotenv = require('dotenv').config({path: __dirname + '/.env'})
+const CopyPlugin = require('copy-webpack-plugin')
+const dotenv = require('dotenv').config({ path: path.join(__dirname, '.env') })
 
 module.exports = {
   output: {
@@ -17,13 +17,11 @@ module.exports = {
           ...dotenv.parsed,
           ...process.env
         }
-      },
+      }
     }),
     new MiniCssExtractPlugin(),
     new CopyPlugin({
-      patterns: [
-        { from: "public", to: "." }
-      ],
+      patterns: [{ from: 'public', to: '.' }]
     })
   ],
   module: {
