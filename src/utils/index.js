@@ -3,10 +3,12 @@ async function fetchImage(fetchUrl) {
     const response = await fetch(fetchUrl)
     if (!response.ok) throw new Error(response.status)
     const { image: imageUrl } = await response.json()
+
     return imageUrl
   } catch (err) {
     console.error(err)
   }
+
   return ''
 }
 
@@ -16,6 +18,7 @@ export async function getRandomImages(number = 1) {
   const promises = Array(number)
     .fill()
     .map(() => fetchImage(apiUrl))
+
   const images = await Promise.all(promises)
 
   return images
@@ -33,16 +36,19 @@ export function formatTime(time, { maxThreeUnits = true, showCent = true } = {})
 
   let formattedTime = ''
   if (hours) formattedTime += `${hours}h `
+
   if (minutes && !hours) {
     formattedTime += `${asString(minutes)}m `
   } else if (minutes) {
     formattedTime += `${asString(minutes, 2)}m `
   }
+
   if (minutes || hours) {
     formattedTime += `${asString(seconds, 2)}s`
   } else {
     formattedTime += `${asString(seconds)}s`
   }
+
   if (showCent && (!hours || !maxThreeUnits)) {
     formattedTime += ` ${asString(centiseconds, 2)}`
   }
