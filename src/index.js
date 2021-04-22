@@ -71,19 +71,33 @@ function loadTheme() {
 }
 
 function isValidPersonalBests(personalBestsObject) {
-  return (
+  const isObject =
     !!personalBestsObject &&
     typeof personalBestsObject === 'object' &&
     !Array.isArray(personalBestsObject)
-  )
+
+  if (isObject) {
+    const isValidShape = Object.entries(personalBestsObject).every(([difficulty, personalBest]) => {
+      const isDifficultyValid = Number.isInteger(Number(difficulty))
+      const isMovesValid = Number.isInteger(personalBest.movesMade)
+      const isTimeValid = Number.isInteger(personalBest.timeTaken)
+      const areRecordsValid = isMovesValid && isTimeValid
+
+      return !isDifficultyValid || areRecordsValid
+    })
+
+    return isValidShape
+  }
+
+  return false
 }
 
 function loadPersonalBests() {
   const savedPersonalBests = JSON.parse(window.localStorage.getItem('personalBests'))
-  if (!isValidPersonalBests(savedPersonalBests)) {
-    personalBests = {}
-  } else {
+  if (isValidPersonalBests(savedPersonalBests)) {
     personalBests = savedPersonalBests
+  } else {
+    personalBests = {}
   }
 }
 
