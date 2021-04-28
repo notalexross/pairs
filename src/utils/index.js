@@ -25,6 +25,8 @@ export async function getRandomImages(number = 1) {
 }
 
 function asString(number, minDigits = 0) {
+  if (Number.isNaN(parseInt(number, 10))) return ''
+
   return number.toString().padStart(minDigits, '0')
 }
 
@@ -53,4 +55,4 @@ function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
   return `${seconds}s${centisecondsString}`
 }
 
-export { formatTime }
+export { asString, formatTime }
