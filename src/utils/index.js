@@ -28,30 +28,29 @@ function asString(number, minDigits = 0) {
   return number.toString().padStart(minDigits, '0')
 }
 
-export function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
+function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
+  if (Number.isNaN(parseInt(time, 10))) return ''
+
   const hours = parseInt(time / (60 * 60 * 1000), 10)
   const minutes = parseInt((time / (60 * 1000)) % 60, 10)
   const seconds = parseInt((time / 1000) % 60, 10)
   const centiseconds = parseInt((time % 1000) / 10, 10)
 
-  let formattedTime = ''
-  if (hours) formattedTime += `${hours}h `
+  const centisecondsString = showCent ? ` ${asString(centiseconds, 2)}` : ''
 
-  if (minutes && !hours) {
-    formattedTime += `${asString(minutes)}m `
-  } else if (minutes) {
-    formattedTime += `${asString(minutes, 2)}m `
+  if (time >= 60 * 60 * 1000) {
+    if (maxThreeUnits) {
+      return `${hours}h ${asString(minutes, 2)}m ${asString(seconds, 2)}s`
+    }
+
+    return `${hours}h ${asString(minutes, 2)}m ${asString(seconds, 2)}s${centisecondsString}`
   }
 
-  if (minutes || hours) {
-    formattedTime += `${asString(seconds, 2)}s`
-  } else {
-    formattedTime += `${asString(seconds)}s`
+  if (time >= 60 * 1000) {
+    return `${minutes}m ${asString(seconds, 2)}s${centisecondsString}`
   }
 
-  if (showCent && (!hours || !maxThreeUnits)) {
-    formattedTime += ` ${asString(centiseconds, 2)}`
-  }
-
-  return formattedTime
+  return `${seconds}s${centisecondsString}`
 }
+
+export { formatTime }
