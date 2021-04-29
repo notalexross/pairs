@@ -55,4 +55,4 @@ function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
   return `${seconds}s${centisecondsString}`
 }
 
-export { asString, formatTime }
+export { fetchImage, asString, formatTime }
