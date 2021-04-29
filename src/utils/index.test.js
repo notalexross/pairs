@@ -117,9 +117,9 @@ describe(`${asString.name}()`, () => {
   describe('with unexpected inputs', () => {
     const cases = [
       ['undefined', 'undefined', 'empty string', undefined, undefined, ''],
+      ['null', 'undefined', 'empty string', null, null, ''],
       ['non-numeric string', 'undefined', 'empty string', 'hello', undefined, ''],
       ['object', 'undefined', 'empty string', {}, undefined, ''],
-      ['non-integer', 'undefined', 'empty string', {}, undefined, ''],
       ['as string', 'undefined', 'expected output', '5', undefined, '5'],
       ['as string', 'integer', 'expected output', '5', 2, '05'],
       ['numeric', 'an object', 'number as string', 5, {}, '5'],
@@ -146,7 +146,9 @@ describe(`${asString.name}()`, () => {
       [42, 1, '42'],
       [42, 2, '42'],
       [42, 3, '042'],
-      [88, 6, '000088']
+      [88, 6, '000088'],
+      [88.88, 1, '88.88'],
+      [88.88, 6, '088.88']
     ]
 
     test.each(cases)(
