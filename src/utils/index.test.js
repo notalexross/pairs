@@ -1,4 +1,4 @@
-import { fetchImage, asString, formatTime } from './index'
+import { fetchImage, getRandomImages, asString, formatTime } from './index'
 
 const apiUrl = 'https://foodish-api.herokuapp.com/api/'
 const mockJsonData = { image: 'https://foodish-api.herokuapp.com/images/dessert/dessert1.jpg' }
@@ -56,6 +56,60 @@ describe(`${fetchImage.name}()`, () => {
     expect(result).toBe('')
     expect(spy).toHaveBeenCalledWith(new Error(mockResponse.status))
     expect(spy).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe(`${getRandomImages.name}() with ${fetchImage.name}()`, () => {
+  describe('with unexpected inputs', () => {
+    const cases = [
+      ['null', 'empty array', null, []],
+      ['non-numeric string', 'empty array', 'hello', []],
+      ['object', 'empty array', {}, []],
+      [
+        'non-integer',
+        'array of images of length parseInt(number, 10)',
+        2.888,
+        Array(2).fill(mockJsonData.image)
+      ],
+      [
+        'as string',
+        'array of images of length parseInt(number, 10)',
+        '3',
+        Array(3).fill(mockJsonData.image)
+      ]
+    ]
+
+    test.each(cases)('given number is %s, returns %s', async (_, __, number, expected) => {
+      const result = await getRandomImages(number)
+
+      expect(result).toEqual(expected)
+    })
+  })
+
+  describe('with expected inputs', () => {
+    test('given problem with API, returns array of empty strings', async () => {
+      const number = 5
+      const error = new Error('API is down')
+      Array(number).fill().forEach(() => fetch.mockRejectedValueOnce(error))
+
+      const result = await getRandomImages(number)
+      const expected = Array(number).fill('')
+
+      expect(result).toEqual(expected)
+    })
+
+    test('given no arguments, returns array of single image', async () => {
+      const result = await getRandomImages()
+
+      expect(result).toEqual([mockJsonData.image])
+    })
+
+    test.each([1, 5, 100])('returns array of images of length %s', async number => {
+      const result = await getRandomImages(number)
+      const expected = Array(number).fill(mockJsonData.image)
+
+      expect(result).toEqual(expected)
+    })
   })
 })
 

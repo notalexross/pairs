@@ -12,7 +12,7 @@ async function fetchImage(fetchUrl) {
   return ''
 }
 
-export async function getRandomImages(number = 1) {
+async function getRandomImages(number = 1) {
   if (Number.isNaN(parseInt(number, 10))) return []
 
   const apiUrl = 'https://foodish-api.herokuapp.com/api/'
@@ -57,4 +57,4 @@ function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
   return `${seconds}s${centisecondsString}`
 }
 
-export { fetchImage, asString, formatTime }
+export { fetchImage, getRandomImages, asString, formatTime }
