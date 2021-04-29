@@ -13,9 +13,11 @@ async function fetchImage(fetchUrl) {
 }
 
 export async function getRandomImages(number = 1) {
+  if (Number.isNaN(parseInt(number, 10))) return []
+
   const apiUrl = 'https://foodish-api.herokuapp.com/api/'
 
-  const promises = Array(number)
+  const promises = Array(parseInt(number, 10))
     .fill()
     .map(() => fetchImage(apiUrl))
 
