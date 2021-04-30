@@ -84,7 +84,8 @@ function savePersonalBests() {
 }
 
 function hasPersonalBestStored() {
-  return !!personalBests[totalCards]
+  const personalBest = personalBests[totalCards]
+  return typeof personalBest === 'object' && !Array.isArray(personalBest)
 }
 
 function isPersonalBest() {

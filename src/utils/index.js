@@ -66,11 +66,14 @@ function isValidPersonalBests(personalBestsObject) {
   if (isObject) {
     const isValidShape = Object.entries(personalBestsObject).every(([difficulty, personalBest]) => {
       const isDifficultyValid = Number.isInteger(Number(difficulty))
-      const isMovesValid = Number.isInteger(personalBest.movesMade)
-      const isTimeValid = Number.isInteger(personalBest.timeTaken)
+      const hasPersonalBest = typeof personalBest === 'object' && !Array.isArray(personalBest)
+      const isMovesValid =
+        !hasPersonalBest || !personalBest.movesMade || Number.isInteger(personalBest.movesMade)
+      const isTimeValid =
+        !hasPersonalBest || !personalBest.timeTaken || Number.isInteger(personalBest.timeTaken)
       const areRecordsValid = isMovesValid && isTimeValid
 
-      return !isDifficultyValid || areRecordsValid
+      return !isDifficultyValid || !hasPersonalBest || areRecordsValid
     })
 
     return isValidShape
