@@ -83,6 +83,8 @@ function isValidPersonalBests(personalBestsObject) {
 }
 
 function getShuffled(cards) {
+  if (!Array.isArray(cards)) return cards
+
   const cardsCopy = cards.slice()
   const numCards = cardsCopy.length
 
