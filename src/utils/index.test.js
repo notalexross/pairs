@@ -3,7 +3,8 @@ import {
   getRandomImages,
   asString,
   formatTime,
-  isValidPersonalBests
+  isValidPersonalBests,
+  getShuffled
 } from './index'
 
 const apiUrl = 'https://foodish-api.herokuapp.com/api/'
@@ -241,5 +242,52 @@ describe(`${isValidPersonalBests.name}()`, () => {
     const result = isValidPersonalBests(input)
 
     expect(result).toBe(expected)
+  })
+})
+
+describe(`${getShuffled.name}()`, () => {
+  describe('with unexpected inputs', () => {
+    const cases = [
+      ['undefined', undefined],
+      ['string', 'hello'],
+      ['number', 42],
+      ['boolean', true],
+      ['null', null],
+      ['object', {}]
+    ]
+
+    test.each(cases)('given input is not an array (%s), returns input', (_, input) => {
+      const result = getShuffled(input)
+
+      expect(result).toBe(input)
+    })
+  })
+
+  describe('with expected inputs', () => {
+    let input
+
+    beforeEach(() => {
+      input = Array(10)
+        .fill()
+        .map((_, idx) => ({ idx }))
+    })
+
+    test('returns array containing all the same entries as input', () => {
+      const result = getShuffled(input)
+
+      input.sort((a, b) => a.idx - b.idx)
+      result.sort((a, b) => a.idx - b.idx)
+
+      expect(result).toEqual(input)
+      result.forEach((el, idx) => {
+        expect(el).toBe(input[idx])
+      })
+    })
+
+    test('returns shuffled version of input array', () => {
+      const result = getShuffled(input)
+
+      expect(result).not.toEqual(input)
+    })
   })
 })
