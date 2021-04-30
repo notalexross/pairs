@@ -57,4 +57,40 @@ function formatTime(time, { maxThreeUnits = true, showCent = true } = {}) {
   return `${seconds}s${centisecondsString}`
 }
 
-export { fetchImage, getRandomImages, asString, formatTime }
+function isValidPersonalBests(personalBestsObject) {
+  const isObject =
+    !!personalBestsObject &&
+    typeof personalBestsObject === 'object' &&
+    !Array.isArray(personalBestsObject)
+
+  if (isObject) {
+    const isValidShape = Object.entries(personalBestsObject).every(([difficulty, personalBest]) => {
+      const isDifficultyValid = Number.isInteger(Number(difficulty))
+      const isMovesValid = Number.isInteger(personalBest.movesMade)
+      const isTimeValid = Number.isInteger(personalBest.timeTaken)
+      const areRecordsValid = isMovesValid && isTimeValid
+
+      return !isDifficultyValid || areRecordsValid
+    })
+
+    return isValidShape
+  }
+
+  return false
+}
+
+function getShuffled(cards) {
+  const cardsCopy = cards.slice()
+  const numCards = cardsCopy.length
+
+  const shuffledCards = []
+  for (let i = 0; i < numCards; i++) {
+    const randomIndex = Math.floor(Math.random() * cardsCopy.length)
+    const [randomCard] = cardsCopy.splice(randomIndex, 1)
+    shuffledCards[i] = randomCard
+  }
+
+  return shuffledCards
+}
+
+export { fetchImage, getRandomImages, asString, formatTime, isValidPersonalBests, getShuffled }

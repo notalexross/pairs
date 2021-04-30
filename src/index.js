@@ -1,6 +1,6 @@
 import './index.css'
 import MESSAGES from './language'
-import { getRandomImages, formatTime } from './utils'
+import { getRandomImages, formatTime, isValidPersonalBests, getShuffled } from './utils'
 
 const { body } = document
 const loadingSpinner = document.querySelector('#loading')
@@ -68,28 +68,6 @@ function loadTheme() {
   }
 
   setTheme(savedThemeIndex)
-}
-
-function isValidPersonalBests(personalBestsObject) {
-  const isObject =
-    !!personalBestsObject &&
-    typeof personalBestsObject === 'object' &&
-    !Array.isArray(personalBestsObject)
-
-  if (isObject) {
-    const isValidShape = Object.entries(personalBestsObject).every(([difficulty, personalBest]) => {
-      const isDifficultyValid = Number.isInteger(Number(difficulty))
-      const isMovesValid = Number.isInteger(personalBest.movesMade)
-      const isTimeValid = Number.isInteger(personalBest.timeTaken)
-      const areRecordsValid = isMovesValid && isTimeValid
-
-      return !isDifficultyValid || areRecordsValid
-    })
-
-    return isValidShape
-  }
-
-  return false
 }
 
 function loadPersonalBests() {
@@ -271,20 +249,6 @@ function buildCards(cardWidth) {
   return cards
 }
 
-function getShuffledCards(cards) {
-  const cardsCopy = cards.slice()
-  const numCards = cardsCopy.length
-
-  const shuffledCards = []
-  for (let i = 0; i < numCards; i++) {
-    const randomIndex = Math.floor(Math.random() * cardsCopy.length)
-    const [randomCard] = cardsCopy.splice(randomIndex, 1)
-    shuffledCards[i] = randomCard
-  }
-
-  return shuffledCards
-}
-
 async function addImages(cards, imageUrls) {
   const offlineContent = Array(imageUrls.length)
     .fill()
@@ -337,7 +301,7 @@ async function populateGrid(columns) {
 
   addCardsToGrid(cards)
 
-  const shuffledCards = getShuffledCards(cards)
+  const shuffledCards = getShuffled(cards)
   const imageUrls = await getRandomImages(totalCards / 2)
 
   addImages(shuffledCards, imageUrls)
