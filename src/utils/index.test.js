@@ -1,4 +1,10 @@
-import { fetchImage, getRandomImages, asString, formatTime } from './index'
+import {
+  fetchImage,
+  getRandomImages,
+  asString,
+  formatTime,
+  isValidPersonalBests
+} from './index'
 
 const apiUrl = 'https://foodish-api.herokuapp.com/api/'
 const mockJsonData = { image: 'https://foodish-api.herokuapp.com/images/dessert/dessert1.jpg' }
@@ -205,5 +211,35 @@ describe(`${formatTime.name}()`, () => {
 
       expect(result).toBe(expected)
     })
+  })
+})
+
+describe(`${isValidPersonalBests.name}()`, () => {
+  const cases = [
+    ['undefined', 'false', undefined, false],
+    ['array', 'true', [], false],
+    ['empty object', 'true', {}, true],
+    ['expected object', 'true', { 8: { movesMade: 8, timeTaken: 20000 } }, true],
+    ['object with numeric key & undefined value', 'true', { 8: undefined }, true],
+    ['object with numeric key & empty object value', 'true', { 8: {} }, true],
+    ['object with superfluous keys', 'true', { hello: {} }, true],
+    [
+      'object with numeric key & only superfluous keys in nested object',
+      'true',
+      { 8: { foo: 8, bar: 20000 } },
+      true
+    ],
+    [
+      'object with numeric key & additional superfluous keys in nested object',
+      'true',
+      { 8: { movesMade: 8, timeTaken: 20000, hello: 'hi' } },
+      true
+    ]
+  ]
+
+  test.each(cases)('given input %s, returns %s', (_, __, input, expected) => {
+    const result = isValidPersonalBests(input)
+
+    expect(result).toBe(expected)
   })
 })
