@@ -13,3 +13,4 @@ Created for Scrimba's Weekly Web Dev Challenge, 3<sup>rd</sup> Feb 2021.
 - Switch theme
 - Timer and moves counter
 - Storage of personal bests and selected theme
+- Unit and integration tests
