@@ -46,6 +46,7 @@
   <body>
     <div class="container">
       <div id="game" class="game">
+        <div id="game-status" role="alert"></div>
         <div class="header">
           <div class="header__item header__item--score">
             <div class="time-container" title="Time elapsed">
@@ -66,7 +67,7 @@
         </div>
         <div class="loading-wrapper">
           <div id="grid" class="grid"></div>
-          <div id="loading" class="loading">
+          <div id="loading" class="loading" >
             <div class="loading__spinner"></div>
           </div>
         </div>
@@ -75,7 +76,7 @@
           <button class="btn btn--theme">Switch Theme</button>
         </div>
       </div>
-      <div id="game-results" class="game-results">
+      <div id="game-results" class="game-results" role="dialog" aria-label="game over">
         <div class="game-results__inner">
           <div class="game-results__content">
             <p class="game-results__message"></p>
@@ -83,7 +84,7 @@
               <span>Moves: <span class="moves"></span></span>
               <span>Time: <span class="timer"></span></span>
             </p>
-            <button class="btn btn--reset">Play again</button>
+            <button id="play-again" class="btn btn--reset">Play again</button>
           </div>
         </div>
       </div>
@@ -103,6 +104,7 @@
                   href="<%= env.GITHUB_URL %>"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="GitHub"
                 >
                   <i class="fab fa-github"></i>
                 </a>
@@ -113,6 +115,7 @@
                   href="<%= env.TWITTER_URL %>"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Twitter"
                 >
                   <i class="fab fa-twitter"></i>
                 </a>
@@ -123,6 +126,7 @@
                   href="<%= env.PORTFOLIO_URL %>"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Portfolio"
                 >
                   <i class="fas fa-briefcase"></i>
                 </a>

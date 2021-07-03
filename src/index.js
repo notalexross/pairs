@@ -4,6 +4,7 @@ import { getRandomImages, formatTime, isValidPersonalBests, getShuffled } from '
 
 const { body } = document
 const loadingSpinner = document.querySelector('#loading')
+const gameStatus = document.querySelector('#game-status')
 const grid = document.querySelector('#grid')
 const movesContainer = document.querySelectorAll('.moves')
 const timerContainer = document.querySelectorAll('.timer')
@@ -11,6 +12,7 @@ const pbMovesContainer = document.querySelector('#pb__moves')
 const pbTimeContainer = document.querySelector('#pb__time')
 const clearStorageButton = document.querySelector('.btn--reset-storage')
 const resetButtons = document.querySelectorAll('.btn--reset')
+const playAgainButton = document.querySelector('#play-again')
 const gameModeButtons = document.querySelectorAll('.btn--game-select')
 const changeThemeButton = document.querySelector('.btn--theme')
 const gameSelectContainer = document.querySelector('#game-select')
@@ -170,10 +172,14 @@ function showGameOverModal() {
   display(gameResultsContainer)
   setTimeout(() => {
     gameResultsContainer.classList.add('shown')
+    playAgainButton.focus()
   }, 800)
 }
 
 function handleGameOver() {
+  setTimeout(() => {
+    gameStatus.ariaLabel = 'game finished'
+  }, 0)
   clearTimer()
   showGameOverModal()
 }
@@ -194,8 +200,17 @@ function handleCardClick(event) {
   if (card.classList.contains('card--active')) return
   card.classList.add('card--active')
 
+  const cardFront = card.querySelector('.card__front')
+  const cardBack = card.querySelector('.card__back')
+
+  cardFront.ariaHidden = true
+  cardBack.ariaHidden = false
+  cardFront.tabIndex = -1
+
   if (currentActiveCard) {
     const activeCard = currentActiveCard
+    const activeCardFront = activeCard.querySelector('.card__front')
+    const activeCardBack = activeCard.querySelector('.card__back')
     const isMatchingPair = card.dataset.src === activeCard.dataset.src
 
     incrementMovesCounter()
@@ -209,6 +224,14 @@ function handleCardClick(event) {
       setTimeout(() => {
         card.classList.remove('card--active')
         activeCard.classList.remove('card--active')
+
+        cardFront.ariaHidden = false
+        cardBack.ariaHidden = true
+        cardFront.tabIndex = 0
+
+        activeCardFront.ariaHidden = false
+        activeCardBack.ariaHidden = true
+        activeCardFront.tabIndex = 0
       }, timeShowNonMatchingPair)
     }
 
@@ -218,7 +241,7 @@ function handleCardClick(event) {
   }
 }
 
-function buildCard(cardWidth) {
+function buildCard(cardWidth, cardIdx) {
   const card = document.createElement('div')
 
   card.style.width = cardWidth
@@ -227,9 +250,19 @@ function buildCard(cardWidth) {
     <div class="card__ratio">
       <div class="card__ratio__inner">
         <div class="card__inner">
-          <div class="card__front"></div>
-          <div class="card__back">
-            <img class="card__image" />
+          <button
+            class="card__front"
+            aria-label="reveal card ${cardIdx + 1} of ${totalCards}"
+            aria-hidden="false"
+          ></button>
+          <div
+            class="card__back"
+            aria-hidden="true"
+          >
+            <img
+              class="card__image"
+              role="alert"
+            />
           </div>
         </div>
       </div>
@@ -245,7 +278,7 @@ function buildCard(cardWidth) {
 function buildCards(cardWidth) {
   const cards = Array(totalCards)
     .fill()
-    .map(() => buildCard(cardWidth))
+    .map((_, cardIdx) => buildCard(cardWidth, cardIdx))
 
   return cards
 }
@@ -297,6 +330,10 @@ function addCardsToGrid(cards) {
 async function populateGrid(columns) {
   setIsLoading(true)
 
+  setTimeout(() => {
+    gameStatus.ariaLabel = 'loading game'
+  }, 0)
+
   const cardWidth = `${(1 / columns) * 100}%`
   const cards = buildCards(cardWidth)
 
@@ -316,6 +353,8 @@ async function populateGrid(columns) {
       }, timerInterval)
 
       setIsLoading(false)
+
+      gameStatus.ariaLabel = 'game started'
     })
 }
 

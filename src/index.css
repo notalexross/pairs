@@ -133,6 +133,8 @@ body {
 }
 
 .card__front {
+  border: none;
+  display: block;
   background-color: var(--clr-secondary);
   background-image: var(--bg-card);
   background-size: cover;
